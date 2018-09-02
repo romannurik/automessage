@@ -20,33 +20,37 @@ you want is:
 
 First, use a `@automessage.attach` decorator on your `ndb.Model` subclass:
 
-    from google.appengine.ext import ndb
-    import automessage
+```python
+from google.appengine.ext import ndb
+import automessage
 
-    @automessage.attach()
-    class Book(ndb.Model):
-      title = ndb.StringProperty()
-      author = ndb.StringProperty()
-      publish_date = ndb.DateTimeProperty(indexed=True)
+@automessage.attach()
+class Book(ndb.Model):
+  title = ndb.StringProperty()
+  author = ndb.StringProperty()
+  publish_date = ndb.DateTimeProperty(indexed=True)
+```
 
 This generates a class `BookMessage` (a subclass of `protorpc.messages.Message`) in the same module
 as the `Book` class, that you can then use in your `protorpc`-based services, like so:
 
-    class BooksService(remote.Service):
-      class FindRequest(messages.Message):
-        title = messages.StringField(1, required=True)
+```python
+class BooksService(remote.Service):
+  class FindRequest(messages.Message):
+    title = messages.StringField(1, required=True)
 
-      @remote.method(FindRequest, BookMessage)
-      def find(self, request):
-        return (Book
-            .query(Book.title == request.title)
-            .to_message()) # to_message() added by automessage
+  @remote.method(FindRequest, BookMessage)
+  def find(self, request):
+    return (Book
+        .query(Book.title == request.title)
+        .to_message()) # to_message() added by automessage
 
-      @remote.method(BookMessage, BookMessage)
-      def create(self, request):
-        book = Book.from_message(request) # from_message() added by automessage
-        book.put()
-        return book.to_message()
+  @remote.method(BookMessage, BookMessage)
+  def create(self, request):
+    book = Book.from_message(request) # from_message() added by automessage
+    book.put()
+    return book.to_message()
+```
 
 `attach` takes several parameters (see the code for details) that lets you customize the name of the
 generated message class, convert to camel case, add an ID field, blacklist/whitelist properties,
