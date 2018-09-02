@@ -14,6 +14,7 @@
 
 import calendar
 import datetime
+import sys
 
 import protorpc.definition
 import protorpc.descriptor
@@ -49,7 +50,7 @@ def attach(name=None, **kwargs):
     if not _name:
       _name = '%sMessage' % model_cls.__name__
     message_cls = _make_message_class(_name, model_cls.__module__, model_cls, **kwargs)
-    setattr(__import__(model_cls.__module__), _name, message_cls)
+    setattr(sys.modules[model_cls.__module__], _name, message_cls)
     return model_cls
 
   return _decorator
