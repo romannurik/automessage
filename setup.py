@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
   name='automessage',
-  version='0.1.1',
+  version='0.1.2',
   author='Roman Nurik',
   author_email='roman@nurik.net',
   description='Automatic protorpc message types for ndb.Model subclasses (Google App Engine only)',
