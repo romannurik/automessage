@@ -16,7 +16,7 @@ setuptools.setup(
   keywords=['Google App Engine', 'GAE'],
   classifiers=[
     'Programming Language :: Python :: 2.7',
-    'License :: OSI Approved :: Apache 2.0 License',
+    'License :: OSI Approved :: Apache Software License',
     'Operating System :: OS Independent',
   ],
 )
