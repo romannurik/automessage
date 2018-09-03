@@ -57,3 +57,7 @@ generated message class, convert to camel case, add an ID field, blacklist/white
 etc. You can decorate models with multiple `attach` calls (with different parameters) to create
 multiple message types for a given model. When doing so, you'll need to provide the message type
 in `to_message` calls, e.g. `book.to_message(CustomBookMessage)`.
+
+## Related work
+
+* [Protopigeon](https://github.com/theacodes/Protopigeon) is an almost identical, older approach with a slightly different API and better testing.
