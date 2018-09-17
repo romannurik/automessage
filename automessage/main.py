@@ -159,15 +159,15 @@ def _make_message_class(target_name, target_module_name, model_cls,
 
       attrs['type_name'] = prop_message_cls.__module__ + '.' + prop_message_cls.__name__
       if prop._repeated:
-        prop_serializer = (lambda entity, prop_name:
+        prop_serializer = (lambda prop_message_cls: (lambda entity, prop_name:
             [_message_from_entity(sub_entity, prop_message_cls)
-              for sub_entity in getattr(entity, prop_name)])
+              for sub_entity in getattr(entity, prop_name)]))(prop_message_cls)
         prop_deserializer = (lambda message, prop_name:
             [_entity_from_message(sub_message)
               for sub_message in getattr(message, msg_prop_name(prop_name))])
       else:
-        prop_serializer = (lambda entity, prop_name:
-            _message_from_entity(getattr(entity, prop_name), prop_message_cls))
+        prop_serializer = (lambda prop_message_cls: (lambda entity, prop_name:
+            _message_from_entity(getattr(entity, prop_name), prop_message_cls)))(prop_message_cls)
         prop_deserializer = (lambda message, prop_name:
             _entity_from_message(getattr(message, msg_prop_name(prop_name))))
       # TODO: need to generate a message class for this model class type
