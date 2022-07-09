@@ -58,7 +58,7 @@ def attach(name=None, **kwargs):
 
 
 def _make_message_class(target_name, target_module_name, model_cls,
-                        id_field=False, camel_case=False, types={},
+                        id_field=None, camel_case=False, types={},
                         only_props=[], exclude_props=[]):
   only_props = set(only_props)
   exclude_props = set(exclude_props)
@@ -81,7 +81,10 @@ def _make_message_class(target_name, target_module_name, model_cls,
         name=msg_prop_name('id'),
         number=field_number,
         label=protorpc.descriptor.FieldDescriptor.Label.OPTIONAL,
-        variant=protorpc.descriptor.FieldDescriptor.Variant.UINT64))
+        variant=(
+            protorpc.descriptor.FieldDescriptor.Variant.STRING
+            if id_field == 'string' else
+            protorpc.descriptor.FieldDescriptor.Variant.UINT64)))
     prop_serializers['id'] = lambda entity, prop_name: entity.key.id()
     # prop_deserializers[prop_name] = prop_deserializer
 
@@ -167,9 +170,11 @@ def _make_message_class(target_name, target_module_name, model_cls,
               for sub_message in getattr(message, msg_prop_name(prop_name))])
       else:
         prop_serializer = (lambda prop_message_cls: (lambda entity, prop_name:
-            _message_from_entity(getattr(entity, prop_name), prop_message_cls)))(prop_message_cls)
+            _message_from_entity(getattr(entity, prop_name), prop_message_cls)
+            if getattr(entity, prop_name) else None))(prop_message_cls)
         prop_deserializer = (lambda message, prop_name:
-            _entity_from_message(getattr(message, msg_prop_name(prop_name))))
+            _entity_from_message(getattr(message, msg_prop_name(prop_name)))
+            if getattr(message, msg_prop_name(prop_name)) else None)
       # TODO: need to generate a message class for this model class type
       #message_types.append(protorpc.descriptor.describe_message(prop_message_cls))
       #raise NotImplementedError('Structured properties must be in "types"')
@@ -214,6 +219,10 @@ def _make_message_class(target_name, target_module_name, model_cls,
 
   def _deserializer(message, update_entity = None):
     entity = update_entity if update_entity else model_cls()
+    if id_field:
+      id = getattr(message, msg_prop_name('id'))
+      if id:
+        entity.key = ndb.key.Key(model_cls.__name__, id)
     for (prop_name, deserializer) in prop_deserializers.items():
       setattr(entity, prop_name, deserializer(message, prop_name))
     return entity
